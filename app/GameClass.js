@@ -87,6 +87,7 @@ export default class Game {
 
   attemptFullWord(word) {
     if (word.valueOf() === this._hiddenWord.valueOf()) {
+      this._charactersLeft = 0;
       return true;
     }
     return false;

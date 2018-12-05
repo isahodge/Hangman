@@ -49,7 +49,7 @@ function getHiddenWord(file) {
 }
 
 /*
-** Creates a new Game class using the new word, and prints out the information needed
+** Main game. Creates a new Game class for each new word.
 */
 function newWord(file) {
   const hiddenWord = getHiddenWord(file);
@@ -62,9 +62,34 @@ function newWord(file) {
   return game;
 }
 
-// change validation to account for a word
 function invalidInput(input) {
   return !/^[a-z]{1}$/.test(input);
+}
+
+function checkWinLose(rl, game, user, file) {
+  if (game.remainingGuesses <= 0) {
+    rl.close();
+  } else if (game.checkWin()) {
+    console.log("You won!\nHere's another word");
+    user.win();
+    game = newWord(file);
+  }
+  return game;
+}
+
+
+function guessWord(rl, game) {
+  rl.question('Guess the full word\n', (answer) => {
+    if (!game.attemptFullWord(answer)) {
+      console.log('Wrong');
+      game.wrongGuess();
+      game.board.printBoard();
+      console.log(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`);
+    } else {
+      console.log('Correct!');
+    }
+  });
+  return game;
 }
 
 function gameLoop(file, user) {
@@ -83,8 +108,11 @@ function gameLoop(file, user) {
 
   rl.on('line', (line) => {
     game.char = line.trim();
-
-    if (invalidInput(line.trim())) {
+    const guess = (line.trim().valueOf() === 'guess'.valueOf());
+    if (guess) {
+      rl.pause();
+      game = guessWord(rl, game);
+    } else if (invalidInput(line.trim())) {
       console.log('Invalid input. Enter a single lowercase alphabetical character\n');
     } else if (game.checkAlreadyGuessed()) {
       console.log('You\'ve already used this character. Try another one.\n');
@@ -96,14 +124,9 @@ function gameLoop(file, user) {
       game.wrongGuess();
     }
     game.board.printBoard();
+    console.log(`Guess: ${guess}`);
     console.log(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`);
-    if (game.remainingGuesses <= 0) {
-      rl.close();
-    } else if (game.checkWin()) {
-      console.log("You won!\nHere's another word");
-      user.win();
-      game = newWord(file);
-    }
+    game = checkWinLose(rl, game, user, file);
   });
 }
 
