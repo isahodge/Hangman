@@ -1,17 +1,8 @@
 import fetch from 'node-fetch';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import readline from 'readline';
+import prompt from 'prompt';
 
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  prompt: 'You are playing HANGMAN\n',
-});
-
-rl.on('close', () => {
-  console.log('Exiting the game.');
-});
 
 /*
 ** Helper functions
@@ -49,7 +40,7 @@ function hintDefinition(headWord) {
           const bodyjson = JSON.parse(body);
           const entries = bodyjson['results'][0]['lexicalEntries'][0]['entries'][0]['senses'];
           if (entries) {
-            const shortDef = entries[0]['short_definitions'];
+            const shortDef = entries[0]['short_definitions'][0];
             const definition = entries[0]['definitions'];
             if (shortDef || definition)
               console.log(`Hint: ${shortDef || definition}`);
@@ -65,7 +56,7 @@ function hintDefinition(headWord) {
         console.log('Could not provide hint');
       }
     })
-    .catch(error => console.log(error));
+    .catch(error => console.log(`Error: ${error}`));
 }
 //make this into a hintHeadWordApi function
 function hint(hiddenWord) {
@@ -94,31 +85,66 @@ function hint(hiddenWord) {
 //make a 'hint' function that calls the hint
 
 //this should take in the game class/struct and call the wrong guess method 
-function attemptFullWord(word, hiddenWord) {
+function attemptFullWord(word, hiddenWord) {//should be game method
   if (word.valueOf() === hiddenWord.valueOf())
     return true;
   return false;
 }
 
 class User {
-  constructor(name) {
-    this.name = name;
-    this.score = 0;
+  constructor(name, difficulty) {
+    this._name = name;
+    this._score = 0;
+    this._difficulty = difficulty;
+  }
+
+  get score() {
+    return this._score;
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get difficulty() {
+    return this._difficulty;
   }
   
   win() {
-    this.score += 1;
-    return this.score;
+    this._score += 1;
   }
-
 }
 
-//make a board class
+class Board {
+  constructor(length, word) {
+    this._length = length;
+    this._word = word;
+    this._characters = new Array(length).fill('_');
+  }
+
+  printBoard() {
+    console.log(this._characters);
+  }
+
+  revealCharacters (char) {
+    const positions = [];
+    for (let i = 0; i < this._length; i += 1) {
+      if (this._word[i] === char) {
+        positions.push(i);
+      }
+    }
+    const positionsSize = positions.length;
+    for (let j = 0; j < positionsSize; j += 1) {
+      this._characters[positions[j]] = char;
+    }
+  }
+}
+
 class Game {
   constructor(hiddenWord, hiddenWordLen) {
     this._hiddenWord = hiddenWord;
     this._hiddenWordLen = hiddenWordLen;
-    this._revealedWord = new Array(hiddenWordLen).fill('_');
+    this._board = new Board(hiddenWordLen, hiddenWord);
     this._wrongGuessStr = '';
     this._remainingGuesses = 6;
     this._char = '';
@@ -132,11 +158,11 @@ class Game {
     this._charIndex = this._char.charCodeAt(0) - 97;
   }
 
-/*
-** Stores the amount of occurances of each character in the hidden word. This is
-** used to check input from player against an array of occuring characters in the
-** hidden word.
-*/
+  /*
+  ** Stores the amount of occurances of each character in the hidden word. This is
+  ** used to check input from player against an array of occuring characters in the
+  ** hidden word.
+  */
   setCharCountArr() {
     for (let i = 0; i < this._hiddenWordLen; i += 1) {
       // ideally would want a node with value of i in the charPositions array
@@ -144,12 +170,11 @@ class Game {
     }
   }
 
-  get hiddenWord () {
-    return this._hiddenWord;
-  }
-
-  get charCountArr () {
-    return this._charCountArr;
+  /*
+  ** Getters
+  */
+  get board() {
+    return this._board;
   }
 
   get remainingGuesses() {
@@ -162,31 +187,14 @@ class Game {
 
   get charactersLeft() {
     return this._charactersLeft;
-  }
+  }//this should be a method checkin if the user won, and it checks if _characters left is <= 0
 
   printHiddenWord() {
     console.log(`\nHidden word = ${this._hiddenWord} Length: ${this._hiddenWordLen}`);
   }
 
-  printRevealedWord() {
-    console.log(this._revealedWord);
-  }
-
-  revealCharacters () {
-    const positions = [];
-    for (let i = 0; i < this._hiddenWordLen; i += 1) {
-      if (this._hiddenWord[i] === this._char) {
-        positions.push(i);
-      }
-    }
-    const positionsSize = positions.length;
-    for (let j = 0; j < positionsSize; j += 1) {
-      this._revealedWord[positions[j]] = this._char;
-    }
-  }
-
   rightGuess() {
-    this.revealCharacters();
+    this._board.revealCharacters(this._char);
     this._charactersLeft -= this._charCountArr[this._charIndex];
     this._charCountArr[this._charIndex] = -1;
   }
@@ -210,21 +218,56 @@ class Game {
   }
 }
 
+function printLeaderboard(user) {
+  console.log(`Your score: ${user.score}`)
+  const file = 'leaderBoard.txt'
+  const userObj = {
+    name: user.name,
+    score: user.score,
+    difficulty: user.difficulty,
+  }
+  let lb;
+  if (!existsSync(file)) {
+    lb = {'leaderboard': [userObj]}
+  }
+  else {
+    lb = JSON.parse(readFileSync(file));
+    lb['leaderboard'].push(userObj);
+    //sort array according to score
+  }
+  const lbStr = JSON.stringify(lb);
+  writeFileSync(file, lbStr);
+  console.log(lbStr);
+}
+
 function newWord(file) {
   const hiddenWord = getHiddenWord(file);
   let game = new Game(hiddenWord, hiddenWord.length);
 
-  game.printRevealedWord();
+  game.board.printBoard();
   game.printHiddenWord();
-  hint(game.hiddenWord);
+  hint(hiddenWord);
   game.setCharCountArr();//think of a better way to set this
   return game;
 }
 
-
-// game = newWord function that returns a new game obj with a different hidden word 
-function gameLoop(file) {
+function gameLoop(file, user) {
   let game = newWord(file);
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: 'You are playing HANGMAN\n',
+  });
+
+  rl.on('close', () => {
+    console.log('Exiting the game.');
+    printLeaderboard(user)
+      //if score is within top ten on leaderboard, put user name, difficulty, and
+      //score on leaderboard, show leaderboard
+  //check score against leaderboard. if high score store in leaderboard and print "HIGHSCORE!"
+  //print leaderboard
+  });
 
   rl.on('line', (line) => {
     game.char = line.trim();
@@ -240,12 +283,13 @@ function gameLoop(file) {
       console.log('Nope!\n');
       game.wrongGuess();
     }
-    game.printRevealedWord();
+    game.board.printBoard();
     console.log(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`);
     if (game.remainingGuesses <= 0) {
       rl.close();
     } else if (game.charactersLeft <= 0) {
       console.log("You won!\nHere's another word");
+      user.win()
       game = newWord(file);
     }
   });
@@ -253,36 +297,54 @@ function gameLoop(file) {
 
 /*
 ** Contents retrieved by REACH API are words separated by newlines. Here we store all
-** the words in an array with the 'words' key, and the amount of words with the 'total' key.
+** the words in an array with the 'words' key, amount of words with the 'total' key.
 */
-function storeWordsObj(file, body) {
+function storeWordsObj(file, body, difficulty) {
   const dataArray = body.split('\n');
-  const wordsObj = { words: dataArray, total: dataArray.length };
+  const wordsObj = { words: dataArray, total: dataArray.length, difficulty: difficulty };
   writeFileSync(file, JSON.stringify(wordsObj));
+}
+
+function checkFileDifficulty(file, difficulty) {
+  const content = readFileSync(file);
+  const contentjson = JSON.parse(content);
+  if (contentjson.difficulty === difficulty)
+    return true;
+  return false;
 }
 
 /*
 ** Make a GET request to the REACH API and store the contents in the given file.
-** Start the game loop.
 */
-function gameStart(file) {
-  //allow the user the option to choose difficulty
-  if (!existsSync(file)) {
-    console.log(`${file} doesn't exist. Fetching words from REACH API`);
-    fetch('http://app.linkedin-reach.io/words')
+function getWords(file, difficulty) {
+  if (!existsSync(file) || !checkFileDifficulty(file, difficulty)) {
+    console.log(`${file} doesn't exist or doesn't have the requested difficulty. Fetching words from REACH API`);
+    fetch(`http://app.linkedin-reach.io/words?difficulty=${difficulty}`)
       .then(res => res.text())
       .then((body) => {
-        storeWordsObj(file, body);//also store difficulty?
-        gameLoop(file);
+        storeWordsObj(file, body, difficulty);
       })
       .catch(error => console.log(error));
-  }
-  else {
-    gameLoop(file);
   }
 }
 
 /*
-** Start of program. Needs a file to store words from REACH API
+** Start of program. Needs a file to store words from REACH API. Starts the gameloop
 */
-gameStart('words.txt');
+function hangman() {
+  //prompt for username([a-z]), difficulty (1-10)
+  const file = 'words.txt';
+  prompt.start();
+
+  prompt.get(['username', 'difficulty'], (err, result) => {
+    if (err)
+      console.log(err);
+    console.log(`Input: ${result.username}, ${result.difficulty}`)
+    const user = new User(result.username, result.difficulty)
+    getWords(file, user.difficulty);
+    gameLoop(file, user);
+    console.log(`Your score was: ${user.score}`);
+  });
+} 
+
+hangman();
