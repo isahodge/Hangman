@@ -16,7 +16,7 @@ export default class User {
   get difficulty() {
     return this._difficulty;
   }
-  
+
   win() {
     this._score += 1;
   }

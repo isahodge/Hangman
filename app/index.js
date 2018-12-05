@@ -4,34 +4,31 @@ import readline from 'readline';
 import prompt from 'prompt';
 import User from './UserClass';
 import Game from './GameClass';
-import hint from './ApiRequests'
+import hint from './ApiRequests';
 
 /*
 ** Stores the current user score if it's in the top ten recorded, sorts the leaderboard by score,
 ** and prints it.
 */
 function printLeaderboard(user) {
-  console.log(`Your score: ${user.score}`)
-  const file = 'leaderBoard.txt'
+  console.log(`Your score: ${user.score}`);
+  const file = 'leaderBoard.txt';
   const userObj = {
     name: user.name,
     score: user.score,
     difficulty: user.difficulty,
-  }
+  };
   let lb;
   if (!existsSync(file)) {
-    lb = {'leaderboard': [userObj]}
-  }
-  else {
+    lb = { leaderboard: [userObj] };
+  } else {
     lb = JSON.parse(readFileSync(file));
-    lb['leaderboard'].push(userObj);
-    lb['leaderboard'].sort(function (a, b) {
-      return b.score - a.score;
-    })
+    lb.leaderboard.push(userObj);
+    lb.leaderboard.sort((a, b) => b.score - a.score);
     // make this faster by inserting in a binary search way
-      // if score is within top ten on leaderboard, put user name, difficulty, and
-      // score on leaderboard, show leaderboard
-  // check score against leaderboard. if high score store in leaderboard and print "HIGHSCORE!"
+    // if score is within top ten on leaderboard, put user name, difficulty, and
+    // score on leaderboard, show leaderboard
+    // check score against leaderboard. if high score store in leaderboard and print "HIGHSCORE!"
   }
   const lbStr = JSON.stringify(lb);
   writeFileSync(file, lbStr);
@@ -56,7 +53,7 @@ function getHiddenWord(file) {
 */
 function newWord(file) {
   const hiddenWord = getHiddenWord(file);
-  let game = new Game(hiddenWord, hiddenWord.length);
+  const game = new Game(hiddenWord, hiddenWord.length);
 
   game.board.printBoard();
   game.printHiddenWord();
@@ -65,7 +62,7 @@ function newWord(file) {
   return game;
 }
 
-//change validation to account for a word
+// change validation to account for a word
 function invalidInput(input) {
   return !/^[a-z]{1}$/.test(input);
 }
@@ -81,7 +78,7 @@ function gameLoop(file, user) {
 
   rl.on('close', () => {
     console.log('Exiting the game.');
-    printLeaderboard(user)
+    printLeaderboard(user);
   });
 
   rl.on('line', (line) => {
@@ -93,7 +90,7 @@ function gameLoop(file, user) {
       console.log('You\'ve already used this character. Try another one.\n');
     } else if (game.checkRightGuess()) {
       console.log('You guessed right!\n');
-      game.rightGuess()
+      game.rightGuess();
     } else {
       console.log('Nope!\n');
       game.wrongGuess();
@@ -104,7 +101,7 @@ function gameLoop(file, user) {
       rl.close();
     } else if (game.checkWin()) {
       console.log("You won!\nHere's another word");
-      user.win()
+      user.win();
       game = newWord(file);
     }
   });
@@ -117,15 +114,20 @@ function gameLoop(file, user) {
 */
 function storeWordsObj(file, body, difficulty) {
   const dataArray = body.split('\n');
-  const wordsObj = { words: dataArray, total: dataArray.length, difficulty: difficulty };
+  const wordsObj = {
+    words: dataArray,
+    total: dataArray.length,
+    difficulty,
+  };
   writeFileSync(file, JSON.stringify(wordsObj));
 }
 
 function checkFileDifficulty(file, difficulty) {
   const content = readFileSync(file);
   const contentjson = JSON.parse(content);
-  if (contentjson.difficulty === difficulty)
+  if (contentjson.difficulty === difficulty) {
     return true;
+  }
   return false;
 }
 
@@ -133,13 +135,13 @@ function checkFileDifficulty(file, difficulty) {
 ** Make a GET request to the REACH API and store the contents in the given file.
 */
 function getWords(file, user) {
-    fetch(`http://app.linkedin-reach.io/words?difficulty=${user.difficulty}`)
-      .then(res => res.text())
-      .then((body) => {
-        storeWordsObj(file, body, user.difficulty);
-        gameLoop(file, user)
-      })
-      .catch(error => console.log(error));
+  fetch(`http://app.linkedin-reach.io/words?difficulty=${user.difficulty}`)
+    .then(res => res.text())
+    .then((body) => {
+      storeWordsObj(file, body, user.difficulty);
+      gameLoop(file, user);
+    })
+    .catch(error => console.log(error));
 }
 
 /*
@@ -147,36 +149,36 @@ function getWords(file, user) {
 */
 function hangman() {
   const file = 'words.txt';
-  let schema = {
+  const schema = {
     properties: {
       username: {
         pattern: /^[a-z]{3,}$/,
         message: 'Name must be at least 3 characters and lowercase letters',
-        required: true
+        required: true,
       },
       difficulty: {
         pattern: /^([1-9]|10)$/,
         message: 'Difficulty must be a number between 1 and 10',
-        required: true
-      }
-    }
-  }
+        required: true,
+      },
+    },
+  };
   prompt.start();
 
   prompt.get(schema, (err, result) => {
-    if (err)
+    if (err) {
       console.log(err);
-    console.log(`Input: ${result.username}, ${result.difficulty}`)
-    const user = new User(result.username, result.difficulty)
+    }
+    console.log(`Input: ${result.username}, ${result.difficulty}`);
+    const user = new User(result.username, result.difficulty);
     if (!existsSync(file) || !checkFileDifficulty(file, user.difficulty)) {
       console.log(`${file} doesn't exist or doesn't have the requested difficulty. Fetching words from REACH API`);
       getWords(file, user);
-    }
-    else {
+    } else {
       gameLoop(file, user);
     }
     console.log(`Your score was: ${user.score}`);
   });
-} 
+}
 
 hangman();

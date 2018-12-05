@@ -13,7 +13,7 @@ export default class Game {
     this._charCountArr = new Array(26).fill(0);
   }
 
-  set char (value) {
+  set char(value) {
     this._char = value;
     this._charIndex = this._char.charCodeAt(0) - 97;
   }
@@ -65,26 +65,30 @@ export default class Game {
   }
 
   checkWin() {
-    if (this._charactersLeft <= 0)
+    if (this._charactersLeft <= 0) {
       return true;
+    }
     return false;
   }
 
   checkRightGuess() {
-    if (this._charCountArr[this._charIndex])
+    if (this._charCountArr[this._charIndex]) {
       return true;
+    }
     return false;
   }
 
   checkAlreadyGuessed() {
-    if (this._charCountArr[this._charIndex] === -1)
+    if (this._charCountArr[this._charIndex] === -1) {
       return true;
+    }
     return false;
   }
 
   attemptFullWord(word) {
-    if (word.valueOf() === this._hiddenWord.valueOf())
+    if (word.valueOf() === this._hiddenWord.valueOf()) {
       return true;
+    }
     return false;
   }
 }

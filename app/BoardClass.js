@@ -9,7 +9,7 @@ export default class Board {
     console.log(this._characters);
   }
 
-  revealCharacters (char) {
+  revealCharacters(char) {
     const positions = [];
     for (let i = 0; i < this._length; i += 1) {
       if (this._word[i] === char) {
