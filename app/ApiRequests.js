@@ -1,20 +1,19 @@
 import fetch from 'node-fetch';
 
 function parseOxfordApi(body) {
-  // loop through result so I don't dereference a null pointer
-  const bodyjson = JSON.parse(body);
-  const entries = bodyjson.results[0].lexicalEntries[0].entries[0].senses;
-  if (entries) {
-    const shortDef = entries[0].short_definitions[0];
-    const definition = entries[0].definitions;
-    if (shortDef || definition) {
-      console.log(`Hint: ${shortDef || definition}`);
-    } else {
-      console.log('Could not provide hint');
-    }
-  } else {
-    console.log('Could not provide hint');
+  let obj;
+  if (Object.prototype.hasOwnProperty.call(body, 'definitions')) {
+    return body;
   }
+  for (let i = 0; i < Object.keys(body).length; i += 1) {
+    if (typeof body[Object.keys(body)[i]] === 'object') {
+      obj = parseOxfordApi(body[Object.keys(body)[i]]);
+      if (obj != null) {
+        return obj;
+      }
+    }
+  }
+  return null;
 }
 
 function hintDefinition(headWord) {
@@ -31,7 +30,12 @@ function hintDefinition(headWord) {
       console.log(`${result.status}`);
       if (result.status === 200) {
         result.text().then((body) => {
-          parseOxfordApi(body);
+          const def = parseOxfordApi(JSON.parse(body));
+          if (def) {
+            console.log(`Hint: ${JSON.stringify(def.definitions[0])}`);
+          } else {
+            console.log('Could not find a definition');
+          }
         });
       } else {
         console.log('Could not provide hint');
