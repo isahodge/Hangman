@@ -10,6 +10,6 @@ In my reimplementation of the game, there are two rules.
 ### Build
 ```npm install```
 ```npm run build```
-```node lib/index``
+```node lib/index```
 
 This game was made using Node.js and transpiled with Babel 7. Make sure you have the latest version of Node installed.
