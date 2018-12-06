@@ -19,9 +19,8 @@ export default class Game {
   }
 
   /*
-  ** Stores the number of occurances of each character in the hidden word in an array. This is
-  ** used to check the letter input against the array of occuring characters in the
-  ** hidden word.
+  ** Stores the number of occurances and indexes of each character in the hidden word in an array. This is
+  ** used to check the if the input character occurs and where in the word it occurs.
   */
 
   setCharCountArr() {
@@ -101,9 +100,7 @@ export default class Game {
       this._charactersLeft = 0;
       return true;
     }
-    else {
-      this._remainingGuesses -= 1;
-      return false;
-    }
+    this._remainingGuesses -= 1;
+    return false;
   }
 }

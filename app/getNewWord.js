@@ -20,7 +20,6 @@ export default function newWord(file) {
   const game = new Game(hiddenWord, hiddenWord.length);
 
   game.board.printBoard();
-  game.printHiddenWord();
   hint(hiddenWord);
   game.setCharCountArr();
   return game;

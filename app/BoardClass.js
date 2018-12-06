@@ -14,11 +14,10 @@ export default class Board {
   }
 
   revealCharacters(charCountArr, charIndex) {
-
     const positions = charCountArr[charIndex];
 
-    for (let item of positions) {
-      this._characters[item] = String.fromCharCode(charIndex + 97); 
+    for (const item of positions) {
+      this._characters[item] = String.fromCharCode(charIndex + 97);
     }
   }
 }

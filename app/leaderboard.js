@@ -47,7 +47,7 @@ export default function leaderboard(user) {
     lb.leaderboard.push(userObj);
     lb.leaderboard.sort((a, b) => b.score - a.score);
     if (lb.leaderboard.length > 10) {
-      lb.leaderboard.splice(9, 1);
+      lb.leaderboard.splice(10);
     }
   }
   const lbStr = JSON.stringify(lb);
