@@ -1,6 +1,16 @@
-import { hangman } from './chalkColors';
+import { hangman, red } from './chalkColors';
 
-export default function printHangman(wrong) {
+export function printTitle() {
+  console.log(red(' ▄▀▀▄ ▄▄   ▄▀▀█▄   ▄▀▀▄ ▀▄  ▄▀▀▀▀▄    ▄▀▀▄ ▄▀▄  ▄▀▀█▄   ▄▀▀▄ ▀▄'));
+  console.log(red('█  █   ▄▀ ▐ ▄▀ ▀▄ █  █ █ █ █         █  █ ▀  █ ▐ ▄▀ ▀▄ █  █ █ █'));
+  console.log(red('▐  █▄▄▄█    █▄▄▄█ ▐  █  ▀█ █    ▀▄▄  ▐  █    █   █▄▄▄█ ▐  █  ▀█'));
+  console.log(red('   █   █   ▄▀   █   █   █  █     █ █   █    █   ▄▀   █   █   █'));
+  console.log(red('  ▄▀  ▄▀  █   ▄▀  ▄▀   █   ▐▀▄▄▄▄▀ ▐ ▄▀   ▄▀   █   ▄▀  ▄▀   █'));
+  console.log(red(' █   █    ▐   ▐   █    ▐   ▐         █    █    ▐   ▐   █    ▐ '));
+  console.log(red(' ▐   ▐            ▐                  ▐    ▐            ▐ '));
+}
+
+export function printHangman(wrong) {
   let head = 1;
   let armL = 2;
   let body1 = 3;

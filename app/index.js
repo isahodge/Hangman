@@ -1,14 +1,13 @@
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import readline from 'readline';
 import prompt from 'prompt';
 import fetch from 'node-fetch';
 import clear from 'clear';
 import User from './UserClass';
-import Game from './GameClass';
-import hint from './apiRequests';
 import { storeWordsObj, checkFileDifficulty } from './storeWords';
 import leaderboard from './leaderboard';
-import printHangman from './printHangman';
+import { printHangman, printTitle } from './printHangman';
+import newWord from './getNewWord';
 import {
   pink,
   yellow,
@@ -19,32 +18,8 @@ import {
 } from './chalkColors';
 
 /*
-** Randomly chooses a word from a file with an object containing a 'words' array
-*/
-
-function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
-}
-
-function getHiddenWord(file) {
-  const wordsObj = JSON.parse(readFileSync(file, 'utf8'));
-  return wordsObj.words[getRandomInt(wordsObj.total)];
-}
-
-/*
 ** Main game. Creates a new Game class for each new word.
 */
-
-function newWord(file) {
-  const hiddenWord = getHiddenWord(file);
-  const game = new Game(hiddenWord, hiddenWord.length);
-
-  game.board.printBoard();
-  game.printHiddenWord();
-  hint(hiddenWord);
-  game.setCharCountArr();// think of a better way to set this
-  return game;
-}
 
 function invalidInput(input) {
   return !/^[a-z]{1}$/.test(input);
@@ -138,15 +113,6 @@ function getWords(file, user) {
 ** Start of program. Needs a file to store words from REACH API. Starts the gameloop
 */
 
-function printTitle() {
-  console.log(red(' ▄▀▀▄ ▄▄   ▄▀▀█▄   ▄▀▀▄ ▀▄  ▄▀▀▀▀▄    ▄▀▀▄ ▄▀▄  ▄▀▀█▄   ▄▀▀▄ ▀▄'));
-  console.log(red('█  █   ▄▀ ▐ ▄▀ ▀▄ █  █ █ █ █         █  █ ▀  █ ▐ ▄▀ ▀▄ █  █ █ █'));
-  console.log(red('▐  █▄▄▄█    █▄▄▄█ ▐  █  ▀█ █    ▀▄▄  ▐  █    █   █▄▄▄█ ▐  █  ▀█'));
-  console.log(red('   █   █   ▄▀   █   █   █  █     █ █   █    █   ▄▀   █   █   █'));
-  console.log(red('  ▄▀  ▄▀  █   ▄▀  ▄▀   █   ▐▀▄▄▄▄▀ ▐ ▄▀   ▄▀   █   ▄▀  ▄▀   █'));
-  console.log(red(' █   █    ▐   ▐   █    ▐   ▐         █    █    ▐   ▐   █    ▐ '));
-  console.log(red(' ▐   ▐            ▐                  ▐    ▐            ▐ '))
-}
 
 function hangman() {
   printTitle();
@@ -167,15 +133,15 @@ function hangman() {
       },
     },
   };
-  
-  prompt.message = red("Enter");
-  prompt.delimiter = " ❤️ ";
+
+  prompt.message = red('Enter');
+  prompt.delimiter = '❤️ ';
   prompt.start();
 
   prompt.get(schema, (err, result) => {
     if (err) {
       console.log('Bye Homie');
-      return ;
+      return;
     }
     const user = new User(result.username, result.difficulty);
     if (!existsSync(file) || !checkFileDifficulty(file, user.difficulty)) {
@@ -184,7 +150,7 @@ function hangman() {
     } else {
       gameLoop(file, user);
     }
-  })
+  });
 }
 
 hangman();

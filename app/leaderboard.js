@@ -1,6 +1,11 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { pink, pinkInvert, brightPink, basic } from './chalkColors';
 import printj from 'printj';
+import {
+  pink,
+  pinkInvert,
+  brightPink,
+  basic,
+} from './chalkColors';
 
 /*
 ** Stores the current user score if it's in the top ten recorded, sorts the leaderboard by score,
@@ -16,9 +21,9 @@ function printLeaderboard(lb) {
     const userInfo = lb.leaderboard[i];
     if (i % 2) {
       console.log(basic('│') + pink(sprintf('%3s%-10s   %-4d   %2d   %11s   ', ' ', userInfo.name, userInfo.score, userInfo.difficulty, userInfo.date)) + basic('│'));
-    }
-    else
+    } else {
       console.log(basic('│') + pinkInvert(sprintf('%3s%-10s   %-4d   %2d   %11s   ', ' ', userInfo.name, userInfo.score, userInfo.difficulty, userInfo.date)) + basic('│'));
+    }
   }
   console.log('┕––––––––––––––––––––––––––––––––––––––––––––––┙');
 }

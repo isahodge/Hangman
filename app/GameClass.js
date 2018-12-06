@@ -11,7 +11,7 @@ export default class Game {
     this._charIndex = 0;
     this._charactersLeft = hiddenWordLen;
     this._charCountArr = new Array(26).fill(0);
-}
+  }
 
   set char(value) {
     this._char = value;
@@ -34,7 +34,7 @@ export default class Game {
   /*
   ** Getters
   */
- 
+
   get board() {
     return this._board;
   }
