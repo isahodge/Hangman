@@ -1,7 +1,6 @@
-import chalk from 'chalk';
+import { hangman } from './chalkColors';
 
 export default function printHangman(wrong) {
-  const hangman = chalk.bgBlackBright.cyan;
   let head = 1;
   let armL = 2;
   let body1 = 3;

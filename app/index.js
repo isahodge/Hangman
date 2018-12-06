@@ -1,7 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import readline from 'readline';
 import prompt from 'prompt';
-import chalk from 'chalk';
 import fetch from 'node-fetch';
 import User from './UserClass';
 import Game from './GameClass';
@@ -9,7 +8,14 @@ import hint from './apiRequests';
 import { storeWordsObj, checkFileDifficulty } from './storeWords';
 import printLeaderboard from './leaderboard';
 import printHangman from './printHangman';
-
+import {
+  pink,
+  yellow,
+  lightYellow,
+  magentaBright,
+  red,
+  green,
+} from './chalkColors';
 
 /*
 ** Randomly chooses a word from a file with an object containing a 'words' array
@@ -47,8 +53,8 @@ function checkWinLose(rl, game, user, file) {
   if (game.remainingGuesses <= 0) {
     rl.close();
   } else if (game.checkWin()) {
-    console.log(chalk.rgb(222, 229, 149)('◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆ You won! ◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆'));
-    console.log(chalk.rgb(222, 229, 149)("◆ ◆ ◆ ◆ ◆ Here's another word ◆ ◆ ◆ ◆ ◆ ◆"));
+    console.log(lightYellow('◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆ You won! ◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆'));
+    console.log(lightYellow("◆ ◆ ◆ ◆ ◆ Here's another word ◆ ◆ ◆ ◆ ◆ ◆"));
     user.win();
     game = newWord(file);
   }
@@ -79,7 +85,9 @@ function gameLoop(file, user) {
   });
 
   rl.on('close', () => {
-    console.log('Exiting the game.');
+    console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
+    console.log(pink('∾∾∾∾∾∾∾∾∾∾∾∾∾∾ See you later! ∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾'));
+    console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
     printLeaderboard(user);
   });
 
@@ -90,19 +98,19 @@ function gameLoop(file, user) {
       rl.pause();
       game = guessWord(rl, game);
     } else if (invalidInput(line.trim())) {
-      console.log(chalk.yellowBright('\nInvalid input. Enter a single lowercase alphabetical character\n'));
+      console.log(yellow('\nInvalid input. Enter a single lowercase alphabetical character\n'));
     } else if (game.checkAlreadyGuessed()) {
-      console.log(chalk.yellowBright('\nYou\'ve already used this character. Try another one.\n'));
+      console.log(yellow('\nYou\'ve already used this character. Try another one.\n'));
     } else if (game.checkRightGuess()) {
-      console.log(chalk.greenBright('\nYou guessed right!\n'));
+      console.log(green('\nYou guessed right!\n'));
       game.rightGuess();
     } else {
-      console.log(chalk.redBright('\nNope!\n'));
+      console.log(red('\nNope!\n'));
       game.wrongGuess();
     }
     game.board.printBoard();
     printHangman(6 - game.remainingGuesses);
-    console.log(chalk.magentaBright(`\nGuesses Left: ${chalk.red.dim(game.remainingGuesses)}\nWrong guesses:${chalk.red(game.wrongGuessStr)}\n`));
+    console.log(magentaBright(`\nGuesses Left: ${red(game.remainingGuesses)}\nWrong guesses:${red(game.wrongGuessStr)}\n`));
     game = checkWinLose(rl, game, user, file);
   });
 }
@@ -110,6 +118,7 @@ function gameLoop(file, user) {
 /*
 ** Make a GET request to the REACH API and store the contents in the given file.
 */
+
 function getWords(file, user) {
   fetch(`http://app.linkedin-reach.io/words?difficulty=${user.difficulty}`)
     .then(res => res.text())
@@ -123,6 +132,7 @@ function getWords(file, user) {
 /*
 ** Start of program. Needs a file to store words from REACH API. Starts the gameloop
 */
+
 function hangman() {
   const file = 'words.txt';
   const schema = {

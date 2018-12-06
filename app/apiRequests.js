@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import chalk from 'chalk';
+import { red, magenta } from './chalkColors';
 
 function parseOxfordApi(body) {
   let obj;
@@ -32,13 +32,13 @@ function hintDefinition(headWord) {
         result.text().then((body) => {
           const def = parseOxfordApi(JSON.parse(body));
           if (def) {
-            console.log(chalk.magenta(`Hint: ${JSON.stringify(def.definitions[0])}`));
+            console.log(magenta(`Hint: ${JSON.stringify(def.definitions[0])}`));
           } else {
-            console.log(chalk.red('Could not find a definition'));
+            console.log(red('Could not find a definition'));
           }
         });
       } else {
-        console.log(chalk.red('Could not provide hint'));
+        console.log(red('Could not provide hint'));
       }
     })
     .catch(error => console.log(`Error: ${error}`));

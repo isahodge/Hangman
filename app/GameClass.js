@@ -23,6 +23,7 @@ export default class Game {
   ** used to check input from player against an array of occuring characters in the
   ** hidden word.
   */
+
   setCharCountArr() {
     for (let i = 0; i < this._hiddenWordLen; i += 1) {
       // ideally would want a node with value of i in the charPositions array
@@ -48,6 +49,7 @@ export default class Game {
   /*
   ** Methods
   */
+
   printHiddenWord() {
     console.log(`\nHidden word = ${this._hiddenWord} Length: ${this._hiddenWordLen}`);
   }
