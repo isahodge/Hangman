@@ -1,3 +1,7 @@
+import chalk from 'chalk';
+
+const wordbg = chalk.blue.bold;
+
 export default class Board {
   constructor(length, word) {
     this._length = length;
@@ -6,7 +10,9 @@ export default class Board {
   }
 
   printBoard() {
-    console.log(this._characters);
+    const word = this._characters.join(' ');
+    console.log(wordbg('______________________________________________\n\n'));
+    console.log(`             ${wordbg(word)}                  \n`);
   }
 
   revealCharacters(char) {

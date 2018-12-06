@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import chalk from 'chalk';
 
 function parseOxfordApi(body) {
   let obj;
@@ -27,18 +28,17 @@ function hintDefinition(headWord) {
     })
     .then(res => res)
     .then((result) => {
-      console.log(`${result.status}`);
       if (result.status === 200) {
         result.text().then((body) => {
           const def = parseOxfordApi(JSON.parse(body));
           if (def) {
-            console.log(`Hint: ${JSON.stringify(def.definitions[0])}`);
+            console.log(chalk.magenta(`Hint: ${JSON.stringify(def.definitions[0])}`));
           } else {
-            console.log('Could not find a definition');
+            console.log(chalk.red('Could not find a definition'));
           }
         });
       } else {
-        console.log('Could not provide hint');
+        console.log(chalk.red('Could not provide hint'));
       }
     })
     .catch(error => console.log(`Error: ${error}`));
@@ -55,7 +55,6 @@ export default function hint(hiddenWord) {
     })
     .then(res => res)
     .then((result) => {
-      console.log(`${result.status}`);
       if (result.status === 200) {
         result.text().then((body) => {
           const bodyjson = JSON.parse(body);

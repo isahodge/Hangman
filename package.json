@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
+    "chalk": "^2.4.1",
     "fetch": "^1.1.0",
     "fs": "0.0.1-security",
     "node-fetch": "^2.3.0",
