@@ -27,7 +27,10 @@ function invalidInput(input) {
 
 function checkWinLose(rl, game, user, file) {
   if (game.remainingGuesses <= 0) {
-    rl.close();
+    clear();
+    console.log(red('\nGame over'));
+    console.log(red(`\n\n\n\nBy the way, the word was ${game._hiddenWord}`));
+    setTimeout(() => rl.close(), 3000);
   } else if (game.checkWin()) {
     clear();
     console.log(lightYellow('◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆ You won! ◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆'));
@@ -41,12 +44,17 @@ function checkWinLose(rl, game, user, file) {
 function guessWord(rl, game) {
   rl.question(magentaBright('Guess the full word\n'), (answer) => {
     if (!game.attemptFullWord(answer)) {
-      console.log(red('Wrong'));
-      game.wrongGuess();
-      game.board.printBoard();
-      console.log(magentaBright(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`));
+      clear();
+      if (game.remainingGuesses) {
+        console.log(red('\nWrong'));
+        game.board.printBoard();
+        printHangman(6 - game.remainingGuesses);
+        console.log(magentaBright(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`));
+      } else {
+        console.log(red('\nYou lost. Press enter to continue'));
+      }
     } else {
-      console.log(green('Correct!'));
+      console.log(green('\nCorrect! Press enter to continue'));
     }
   });
   return game;
@@ -121,8 +129,8 @@ function hangman() {
     properties: {
       username: {
         description: magentaBright('Username'),
-        pattern: /^[a-z]{3,}$/,
-        message: 'Name must be at least 3 characters and lowercase letters',
+        pattern: /^[a-z]{3,10}$/,
+        message: 'Name must be 3-10 characters and lowercase letters',
         required: true,
       },
       difficulty: {
@@ -145,7 +153,6 @@ function hangman() {
     }
     const user = new User(result.username, result.difficulty);
     if (!existsSync(file) || !checkFileDifficulty(file, user.difficulty)) {
-      console.log(`${file} doesn't exist or doesn't have the requested difficulty. Fetching words from REACH API`);
       getWords(file, user);
     } else {
       gameLoop(file, user);

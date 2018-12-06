@@ -19,16 +19,24 @@ export default class Game {
   }
 
   /*
-  ** Stores the amount of occurances of each character in the hidden word. This is
-  ** used to check input from player against an array of occuring characters in the
+  ** Stores the number of occurances of each character in the hidden word in an array. This is
+  ** used to check the letter input against the array of occuring characters in the
   ** hidden word.
   */
 
   setCharCountArr() {
     for (let i = 0; i < this._hiddenWordLen; i += 1) {
-      // ideally would want a node with value of i in the charPositions array
-      this._charCountArr[this._hiddenWord.charCodeAt(i) - 97] += 1;
+      const index = this._hiddenWord.charCodeAt(i) - 97;
+      if (!this._charCountArr[index]) {
+        this._charCountArr[index] = new Set([i]);
+      } else {
+        this._charCountArr[index].add(i);
+      }
     }
+  }
+
+  set remainingGuesses(value) {
+    this._remainingGuesses = value;
   }
 
   /*
@@ -56,8 +64,8 @@ export default class Game {
   }
 
   rightGuess() {
-    this._board.revealCharacters(this._char);
-    this._charactersLeft -= this._charCountArr[this._charIndex];
+    this._board.revealCharacters(this._charCountArr, this._charIndex);
+    this._charactersLeft -= this._charCountArr[this._charIndex].size;
     this._charCountArr[this._charIndex] = -1;
   }
 
@@ -93,6 +101,9 @@ export default class Game {
       this._charactersLeft = 0;
       return true;
     }
-    return false;
+    else {
+      this._remainingGuesses -= 1;
+      return false;
+    }
   }
 }
