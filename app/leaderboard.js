@@ -7,17 +7,32 @@ import printj from 'printj';
 ** and prints it.
 */
 
-//store all user information
-//manually sort leaderboard
-
-export default function printLeaderboard(user) {
-  console.log(`Your score: ${user.score}`);
-  const file = 'leaderBoard.txt';
+function printLeaderboard(lb) {
   const sprintf = printj.sprintf;
+  console.log('┍––––––––––––––––––––––––––––––––––––––––––––––┑');
+  console.log(basic('│') + brightPink(sprintf('%19sLeaderboard%16s', ' ', ' ')) + basic('│'));
+  console.log(basic('│') + brightPink(sprintf('   User      Score  Difficulty   Date         ')) + basic('│'));
+  for (let i = 0; i < lb.leaderboard.length; i += 1) {
+    const userInfo = lb.leaderboard[i];
+    if (i % 2) {
+      console.log(basic('│') + pink(sprintf('%3s%-10s   %-4d   %2d   %11s   ', ' ', userInfo.name, userInfo.score, userInfo.difficulty, userInfo.date)) + basic('│'));
+    }
+    else
+      console.log(basic('│') + pinkInvert(sprintf('%3s%-10s   %-4d   %2d   %11s   ', ' ', userInfo.name, userInfo.score, userInfo.difficulty, userInfo.date)) + basic('│'));
+  }
+  console.log('┕––––––––––––––––––––––––––––––––––––––––––––––┙');
+}
+
+export default function leaderboard(user) {
+  console.log(`        Your score: ${user.score}`);
+  const file = 'leaderBoard.txt';
+  let date = new Date();
+  date = date.toDateString();
   const userObj = {
     name: user.name,
     score: user.score,
     difficulty: user.difficulty,
+    date,
   };
   let lb;
   if (!existsSync(file)) {
@@ -26,23 +41,11 @@ export default function printLeaderboard(user) {
     lb = JSON.parse(readFileSync(file));
     lb.leaderboard.push(userObj);
     lb.leaderboard.sort((a, b) => b.score - a.score);
-    // make this faster by inserting in a binary search way
-    // if score is within top ten on leaderboard, put user name, difficulty, and
-    // score on leaderboard, show leaderboard
-    // check score against leaderboard. if high score store in leaderboard and print "HIGHSCORE!"
+    if (lb.leaderboard.length > 10) {
+      lb.leaderboard.splice(9, 1);
+    }
   }
   const lbStr = JSON.stringify(lb);
   writeFileSync(file, lbStr);
-  console.log('┍––––––––––––––––––––––––––––––––––––––––––––––┑');
-  console.log(basic('│') + brightPink(sprintf('%19sLeaderboard%16s', ' ', ' ')) + basic('│'));
-  console.log(basic('│') + brightPink(sprintf('%10sUser      Score    Difficulty%7s', ' ', ' ')) + basic('│'));
-  for (let i = 0; i < lb.leaderboard.length; i += 1) {
-    const userInfo = lb.leaderboard[i];
-    if (i % 2) {
-      console.log(basic('│') + pink(sprintf('%10s%-10s   %-4d   %-2d%14s', ' ', userInfo.name, userInfo.score, userInfo.difficulty, ' ')) + basic('│'));
-    }
-    else
-      console.log(basic('│') + pinkInvert(sprintf('%10s%-10s   %-4d   %-2d%14s', ' ', userInfo.name, userInfo.score, userInfo.difficulty, ' ')) + basic('│'));
-  }
-  console.log('┕––––––––––––––––––––––––––––––––––––––––––––––┙');
+  printLeaderboard(lb);
 }

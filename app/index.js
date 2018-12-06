@@ -7,7 +7,7 @@ import User from './UserClass';
 import Game from './GameClass';
 import hint from './apiRequests';
 import { storeWordsObj, checkFileDifficulty } from './storeWords';
-import printLeaderboard from './leaderboard';
+import leaderboard from './leaderboard';
 import printHangman from './printHangman';
 import {
   pink,
@@ -92,7 +92,7 @@ function gameLoop(file, user) {
     console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
     console.log(pink('∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾ See you later! ∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾'));
     console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
-    printLeaderboard(user);
+    leaderboard(user);
   });
 
   rl.on('line', (line) => {
