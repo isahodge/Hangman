@@ -2,6 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import readline from 'readline';
 import prompt from 'prompt';
 import fetch from 'node-fetch';
+import clear from 'clear';
 import User from './UserClass';
 import Game from './GameClass';
 import hint from './apiRequests';
@@ -53,6 +54,7 @@ function checkWinLose(rl, game, user, file) {
   if (game.remainingGuesses <= 0) {
     rl.close();
   } else if (game.checkWin()) {
+    clear();
     console.log(lightYellow('◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆ You won! ◆ ◆ ◆ ◆ ◆ ◆ ◆ ◆'));
     console.log(lightYellow("◆ ◆ ◆ ◆ ◆ Here's another word ◆ ◆ ◆ ◆ ◆ ◆"));
     user.win();
@@ -62,20 +64,21 @@ function checkWinLose(rl, game, user, file) {
 }
 
 function guessWord(rl, game) {
-  rl.question('Guess the full word\n', (answer) => {
+  rl.question(magentaBright('Guess the full word\n'), (answer) => {
     if (!game.attemptFullWord(answer)) {
-      console.log('Wrong');
+      console.log(red('Wrong'));
       game.wrongGuess();
       game.board.printBoard();
-      console.log(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`);
+      console.log(magentaBright(`\nGuesses Left: ${game.remainingGuesses}\nWrong guesses:${game.wrongGuessStr}\n`));
     } else {
-      console.log('Correct!');
+      console.log(green('Correct!'));
     }
   });
   return game;
 }
 
 function gameLoop(file, user) {
+  clear();
   let game = newWord(file);
 
   const rl = readline.createInterface({
@@ -85,27 +88,29 @@ function gameLoop(file, user) {
   });
 
   rl.on('close', () => {
-    console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
-    console.log(pink('∾∾∾∾∾∾∾∾∾∾∾∾∾∾ See you later! ∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾'));
-    console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
+    clear();
+    console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
+    console.log(pink('∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾ See you later! ∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾∾'));
+    console.log(pink('✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦✦'));
     printLeaderboard(user);
   });
 
   rl.on('line', (line) => {
     game.char = line.trim();
     const guess = (line.trim().valueOf() === 'guess'.valueOf());
+    clear();
     if (guess) {
       rl.pause();
       game = guessWord(rl, game);
     } else if (invalidInput(line.trim())) {
-      console.log(yellow('\nInvalid input. Enter a single lowercase alphabetical character\n'));
+      console.log(yellow('\nInvalid input. Enter a single lowercase alphabetical character'));
     } else if (game.checkAlreadyGuessed()) {
-      console.log(yellow('\nYou\'ve already used this character. Try another one.\n'));
+      console.log(yellow('\nYou\'ve already used this character. Try another one.'));
     } else if (game.checkRightGuess()) {
-      console.log(green('\nYou guessed right!\n'));
+      console.log(green('\nYou guessed right!'));
       game.rightGuess();
     } else {
-      console.log(red('\nNope!\n'));
+      console.log(red('\nNope!'));
       game.wrongGuess();
     }
     game.board.printBoard();
@@ -133,27 +138,44 @@ function getWords(file, user) {
 ** Start of program. Needs a file to store words from REACH API. Starts the gameloop
 */
 
+function printTitle() {
+  console.log(red(' ▄▀▀▄ ▄▄   ▄▀▀█▄   ▄▀▀▄ ▀▄  ▄▀▀▀▀▄    ▄▀▀▄ ▄▀▄  ▄▀▀█▄   ▄▀▀▄ ▀▄'));
+  console.log(red('█  █   ▄▀ ▐ ▄▀ ▀▄ █  █ █ █ █         █  █ ▀  █ ▐ ▄▀ ▀▄ █  █ █ █'));
+  console.log(red('▐  █▄▄▄█    █▄▄▄█ ▐  █  ▀█ █    ▀▄▄  ▐  █    █   █▄▄▄█ ▐  █  ▀█'));
+  console.log(red('   █   █   ▄▀   █   █   █  █     █ █   █    █   ▄▀   █   █   █'));
+  console.log(red('  ▄▀  ▄▀  █   ▄▀  ▄▀   █   ▐▀▄▄▄▄▀ ▐ ▄▀   ▄▀   █   ▄▀  ▄▀   █'));
+  console.log(red(' █   █    ▐   ▐   █    ▐   ▐         █    █    ▐   ▐   █    ▐ '));
+  console.log(red(' ▐   ▐            ▐                  ▐    ▐            ▐ '))
+}
+
 function hangman() {
+  printTitle();
   const file = 'words.txt';
   const schema = {
     properties: {
       username: {
+        description: magentaBright('Username'),
         pattern: /^[a-z]{3,}$/,
         message: 'Name must be at least 3 characters and lowercase letters',
         required: true,
       },
       difficulty: {
+        description: magentaBright('Difficulty (1-10)'),
         pattern: /^([1-9]|10)$/,
         message: 'Difficulty must be a number between 1 and 10',
         required: true,
       },
     },
   };
+  
+  prompt.message = red("Enter");
+  prompt.delimiter = " ❤️ ";
   prompt.start();
 
   prompt.get(schema, (err, result) => {
     if (err) {
-      console.log(err);
+      console.log('Bye Homie');
+      return ;
     }
     const user = new User(result.username, result.difficulty);
     if (!existsSync(file) || !checkFileDifficulty(file, user.difficulty)) {
@@ -162,7 +184,7 @@ function hangman() {
     } else {
       gameLoop(file, user);
     }
-  });
+  })
 }
 
 hangman();

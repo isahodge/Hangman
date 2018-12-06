@@ -1,13 +1,19 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { pink, pinkInvert, brightPink, basic } from './chalkColors';
+import printj from 'printj';
 
 /*
 ** Stores the current user score if it's in the top ten recorded, sorts the leaderboard by score,
 ** and prints it.
 */
 
+//store all user information
+//manually sort leaderboard
+
 export default function printLeaderboard(user) {
   console.log(`Your score: ${user.score}`);
   const file = 'leaderBoard.txt';
+  const sprintf = printj.sprintf;
   const userObj = {
     name: user.name,
     score: user.score,
@@ -27,5 +33,16 @@ export default function printLeaderboard(user) {
   }
   const lbStr = JSON.stringify(lb);
   writeFileSync(file, lbStr);
-  console.log(lbStr);
+  console.log('┍––––––––––––––––––––––––––––––––––––––––––––––┑');
+  console.log(basic('│') + brightPink(sprintf('%19sLeaderboard%16s', ' ', ' ')) + basic('│'));
+  console.log(basic('│') + brightPink(sprintf('%10sUser      Score    Difficulty%7s', ' ', ' ')) + basic('│'));
+  for (let i = 0; i < lb.leaderboard.length; i += 1) {
+    const userInfo = lb.leaderboard[i];
+    if (i % 2) {
+      console.log(basic('│') + pink(sprintf('%10s%-10s   %-4d   %-2d%14s', ' ', userInfo.name, userInfo.score, userInfo.difficulty, ' ')) + basic('│'));
+    }
+    else
+      console.log(basic('│') + pinkInvert(sprintf('%10s%-10s   %-4d   %-2d%14s', ' ', userInfo.name, userInfo.score, userInfo.difficulty, ' ')) + basic('│'));
+  }
+  console.log('┕––––––––––––––––––––––––––––––––––––––––––––––┙');
 }
